@@ -12,6 +12,7 @@
 <p>Miau.</p>
 <div>Kiedy Zajaram Staff<div>Cowabanga ale pieniądz to czas final countdown</div>
 <h1>Cowa<h2>Banga<h3>Ale<h4>Jebać Żydów</h4></h3></h2></h1>
+<a href="https://vm.tiktok.com/ZN8YD6SbK/"> link</a>
 <style> :root{background-color: aqua};</style>
 
 </body>
