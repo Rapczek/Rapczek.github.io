@@ -13,16 +13,81 @@
   html,body{
     height:100%;
     background: var(--bg);
-    background-image:
-      radial-gradient(circle at 20% 20%, rgba(255,0,51,0.08), transparent 40%),
-      radial-gradient(circle at 80% 80%, rgba(255,0,51,0.06), transparent 45%),
-      repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px);
     color: var(--red);
     font-family: 'Courier New', monospace;
     display:flex;
     align-items:center;
     justify-content:center;
     overflow:hidden;
+    position: relative;
+  }
+  .bg-glow{
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background-image:
+      radial-gradient(circle at 20% 25%, rgba(255,0,51,0.14), transparent 42%),
+      radial-gradient(circle at 82% 78%, rgba(255,0,51,0.10), transparent 48%),
+      radial-gradient(circle at 50% 50%, rgba(120,0,20,0.15), transparent 60%),
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px);
+    animation: pulse-bg 8s ease-in-out infinite;
+  }
+  @keyframes pulse-bg{
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.65; }
+  }
+  .fog{
+    position: fixed;
+    inset: -10%;
+    z-index: 0;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 30% 100%, rgba(180,0,30,0.10), transparent 70%),
+      radial-gradient(ellipse 50% 35% at 75% 100%, rgba(180,0,30,0.08), transparent 70%);
+    filter: blur(20px);
+    animation: drift 18s ease-in-out infinite alternate;
+  }
+  @keyframes drift{
+    0% { transform: translateX(-3%) translateY(0); }
+    100% { transform: translateX(3%) translateY(-2%); }
+  }
+  .grain{
+    position: fixed;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    animation: grain-move 0.4s steps(3) infinite;
+  }
+  @keyframes grain-move{
+    0%, 100% { transform: translate(0,0); }
+    33% { transform: translate(-2%, 1%); }
+    66% { transform: translate(2%, -1%); }
+  }
+  .ember{
+    position: fixed;
+    bottom: -20px;
+    z-index: 1;
+    border-radius: 50%;
+    background: var(--red);
+    box-shadow: 0 0 6px 2px var(--red-glow);
+    opacity: 0;
+    animation-name: rise;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+  @keyframes rise{
+    0% { transform: translateY(0) translateX(0); opacity: 0; }
+    8% { opacity: 0.9; }
+    92% { opacity: 0.3; }
+    100% { transform: translateY(-110vh) translateX(var(--drift, 40px)); opacity: 0; }
+  }
+  #smoke-canvas{
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    mix-blend-mode: screen;
   }
   .wrap{
     text-align:center;
@@ -64,10 +129,15 @@
       0 0 10px var(--red-glow),
       0 0 30px var(--red-glow),
       0 0 60px var(--red-glow),
-      0 0 100px rgba(255,0,51,0.3);
+      0 0 120px rgba(255,0,51,0.4),
+      0 0 200px rgba(255,0,51,0.15);
     line-height: 1;
     font-variant-numeric: tabular-nums;
-    animation: flicker 4s infinite;
+    animation: flicker 4s infinite, breathe 3s ease-in-out infinite;
+  }
+  @keyframes breathe{
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.15); }
   }
   .unit-label{
     margin-top: 10px;
@@ -99,30 +169,187 @@
   .scanline{
     position: fixed;
     top:0; left:0; right:0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, rgba(255,0,51,0.5), transparent);
-    animation: scan 6s linear infinite;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, rgba(255,0,51,0.9), rgba(255,180,190,0.9), rgba(255,0,51,0.9), transparent);
+    box-shadow: 0 0 12px 2px rgba(255,0,51,0.6);
+    animation: scan 2.2s linear infinite, glitch-x 0.25s steps(6) infinite, glitch-h 0.35s steps(4) infinite;
     z-index: 1;
+    mix-blend-mode: screen;
+  }
+  .scanline::after{
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: inherit;
+    transform: translateX(-4px);
+    opacity: 0.5;
   }
   @keyframes scan{
-    0%{ top: -2px; }
+    0%{ top: -3px; }
     100%{ top: 100%; }
+  }
+  @keyframes glitch-x{
+    0%, 100% { transform: translateX(0); }
+    15% { transform: translateX(-6px); }
+    30% { transform: translateX(4px); }
+    45% { transform: translateX(-2px); }
+    60% { transform: translateX(8px); }
+    75% { transform: translateX(-4px); }
+    90% { transform: translateX(2px); }
+  }
+  @keyframes glitch-h{
+    0%, 100% { height: 3px; opacity: 1; }
+    20% { height: 1px; opacity: 0.6; }
+    40% { height: 5px; opacity: 1; }
+    60% { height: 2px; opacity: 0.7; }
+    80% { height: 4px; opacity: 0.9; }
   }
   .vignette{
     position: fixed;
     inset: 0;
     pointer-events: none;
-    box-shadow: inset 0 0 200px rgba(0,0,0,0.9);
+    box-shadow: inset 0 0 220px rgba(0,0,0,0.95), inset 0 0 80px rgba(0,0,0,0.6);
     z-index: 3;
+  }
+
+  /* ---- Efekt pęknięcia ekranu po zejściu do zera ---- */
+  .reveal{
+    position: fixed;
+    inset: 0;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .reveal.active{
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .reveal-content{
+    text-align: center;
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 0.6s ease 0.9s, transform 0.6s ease 0.9s;
+  }
+  .reveal.active .reveal-content{
+    opacity: 1;
+    transform: scale(1);
+  }
+  .reveal-title{
+    color: #fff;
+    font-size: clamp(20px, 3vw, 32px);
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    margin-bottom: 30px;
+    text-shadow: 0 0 20px var(--red-glow);
+  }
+  .steam-link{
+    display: inline-block;
+    padding: 18px 40px;
+    background: var(--red);
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+    letter-spacing: 3px;
+    font-size: clamp(14px, 1.8vw, 20px);
+    text-transform: uppercase;
+    border-radius: 4px;
+    box-shadow: 0 0 30px var(--red-glow), 0 0 60px rgba(255,0,51,0.3);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    animation: pulse-btn 1.8s ease-in-out infinite;
+  }
+  .steam-link:hover{
+    transform: scale(1.06);
+    box-shadow: 0 0 45px var(--red-glow), 0 0 90px rgba(255,0,51,0.4);
+  }
+  @keyframes pulse-btn{
+    0%, 100% { box-shadow: 0 0 30px var(--red-glow), 0 0 60px rgba(255,0,51,0.3); }
+    50% { box-shadow: 0 0 45px var(--red-glow), 0 0 90px rgba(255,0,51,0.5); }
+  }
+
+  .crack-half{
+    position: fixed;
+    top: 0;
+    width: 50%;
+    height: 100%;
+    z-index: 6;
+    background: var(--bg);
+    background-image:
+      radial-gradient(circle at 20% 25%, rgba(255,0,51,0.14), transparent 42%),
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px);
+    box-shadow: 0 0 60px 10px rgba(0,0,0,0.9);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 1.1s cubic-bezier(.7,0,.3,1);
+  }
+  .crack-half.armed{
+    opacity: 1;
+  }
+  .crack-left{
+    left: 0;
+    clip-path: polygon(0 0, 100% 0, 92% 20%, 100% 38%, 88% 55%, 97% 72%, 90% 100%, 0 100%);
+  }
+  .crack-right{
+    right: 0;
+    clip-path: polygon(8% 0, 100% 0, 100% 100%, 10% 100%, 20% 82%, 5% 65%, 15% 48%, 3% 30%);
+  }
+  .crack-left.split{
+    transform: translateX(-105%) rotate(-2deg);
+  }
+  .crack-right.split{
+    transform: translateX(105%) rotate(2deg);
+  }
+  .crack-line{
+    position: fixed;
+    top: 0;
+    left: 50%;
+    width: 6px;
+    height: 100%;
+    transform: translateX(-50%);
+    z-index: 7;
+    background: linear-gradient(180deg, transparent, var(--red) 15%, #fff 50%, var(--red) 85%, transparent);
+    box-shadow: 0 0 30px 6px var(--red-glow);
+    opacity: 0;
+    animation: crack-flash 0.5s ease-out forwards;
+  }
+  @keyframes crack-flash{
+    0% { opacity: 0; }
+    15% { opacity: 1; }
+    30% { opacity: 0.4; }
+    45% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  .shake{
+    animation: screen-shake 0.6s ease-in-out;
+  }
+  @keyframes screen-shake{
+    0%, 100% { transform: translate(0,0); }
+    10% { transform: translate(-8px, 4px); }
+    20% { transform: translate(7px, -5px); }
+    30% { transform: translate(-6px, 6px); }
+    40% { transform: translate(9px, -3px); }
+    50% { transform: translate(-9px, 2px); }
+    60% { transform: translate(6px, -6px); }
+    70% { transform: translate(-4px, 5px); }
+    80% { transform: translate(5px, -2px); }
+    90% { transform: translate(-3px, 3px); }
   }
 </style>
 </head>
 <body>
 
+<div class="bg-glow"></div>
+<div class="fog"></div>
+<canvas id="smoke-canvas"></canvas>
 <div class="scanline"></div>
+<div id="embers"></div>
+<div class="grain"></div>
 <div class="vignette"></div>
 
-<div class="wrap">
+<div class="wrap" id="wrap">
   <div class="timer" id="timer">
     <div class="unit"><div class="num" id="days">00</div><div class="unit-label">dni</div></div>
     <div class="sep">:</div>
@@ -131,6 +358,16 @@
     <div class="unit"><div class="num" id="minutes">00</div><div class="unit-label">min</div></div>
     <div class="sep">:</div>
     <div class="unit"><div class="num" id="seconds">00</div><div class="unit-label">sek</div></div>
+  </div>
+</div>
+
+<div class="crack-half crack-left" id="crackLeft"></div>
+<div class="crack-half crack-right" id="crackRight"></div>
+
+<div class="reveal" id="reveal">
+  <div class="reveal-content">
+    <div class="reveal-title">Premiera już tutaj</div>
+    <a class="steam-link" href="https://store.steampowered.com/app/1912410/Minecraft_Dungeons_II/" target="_blank" rel="noopener">Minecraft Dungeons II na Steam</a>
   </div>
 </div>
 
@@ -150,6 +387,35 @@
 
   function pad(n){ return String(n).padStart(2, '0'); }
 
+  let cracked = false;
+  function triggerCrack(){
+    if(cracked) return;
+    cracked = true;
+
+    document.body.classList.add('shake');
+
+    const crackLine = document.createElement('div');
+    crackLine.className = 'crack-line';
+    document.body.appendChild(crackLine);
+
+    setTimeout(() => {
+      const left = document.getElementById('crackLeft');
+      const right = document.getElementById('crackRight');
+      left.classList.add('armed');
+      right.classList.add('armed');
+      // wymuś reflow, żeby przejście 'split' zadziałało po pojawieniu się
+      void left.offsetWidth;
+      left.classList.add('split');
+      right.classList.add('split');
+      document.getElementById('wrap').style.transition = 'opacity 0.2s ease';
+      document.getElementById('wrap').style.opacity = '0';
+    }, 250);
+
+    setTimeout(() => {
+      document.getElementById('reveal').classList.add('active');
+    }, 500);
+  }
+
   function update(){
     const now = new Date().getTime();
     const distance = targetDate.getTime() - now;
@@ -157,6 +423,7 @@
     if(distance <= 0){
       document.getElementById('timer').innerHTML = '<div class="done">CZAS MINĄŁ</div>';
       clearInterval(interval);
+      triggerCrack();
       return;
     }
 
@@ -173,8 +440,132 @@
 
   update();
   const interval = setInterval(update, 1000);
+
+  // Unoszące się iskry w tle
+  const embersContainer = document.getElementById('embers');
+  const EMBER_COUNT = 18;
+  for(let i = 0; i < EMBER_COUNT; i++){
+    const ember = document.createElement('div');
+    ember.className = 'ember';
+    const size = 2 + Math.random() * 3;
+    ember.style.width = size + 'px';
+    ember.style.height = size + 'px';
+    ember.style.left = (Math.random() * 100) + 'vw';
+    const duration = 9 + Math.random() * 10;
+    const delay = Math.random() * duration;
+    ember.style.animationDuration = duration + 's';
+    ember.style.animationDelay = '-' + delay + 's';
+    ember.style.setProperty('--drift', (Math.random() * 80 - 40) + 'px');
+    embersContainer.appendChild(ember);
+  }
+
+  // ---- Realistyczny dym (canvas) ----
+  const canvas = document.getElementById('smoke-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, DPR;
+
+  function resize(){
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = W * DPR;
+    canvas.height = H * DPR;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // Prosty szum Perlina-podobny (value noise) do naturalnego kołysania dymu
+  function makeNoise(){
+    const grad = [];
+    for(let i = 0; i < 256; i++) grad.push(Math.random() * Math.PI * 2);
+    function smooth(t){ return t*t*(3-2*t); }
+    return function noise(x){
+      const xi = Math.floor(x) & 255;
+      const xf = x - Math.floor(x);
+      const a = Math.sin(grad[xi]);
+      const b = Math.sin(grad[(xi+1) & 255]);
+      const t = smooth(xf);
+      return a + (b - a) * t;
+    };
+  }
+  const noise = makeNoise();
+
+  class SmokeParticle{
+    constructor(){ this.reset(true); }
+    reset(initial){
+      this.x = W * (0.15 + Math.random() * 0.7);
+      this.y = initial ? H * Math.random() : H + 40 + Math.random() * 60;
+      this.baseX = this.x;
+      this.size = 30 + Math.random() * 70;
+      this.maxSize = this.size * (4 + Math.random() * 3);
+      this.speed = 12 + Math.random() * 18;
+      this.life = 0;
+      this.maxLife = 9 + Math.random() * 8;
+      this.wobbleSeed = Math.random() * 1000;
+      this.wobbleSpeed = 0.15 + Math.random() * 0.2;
+      this.wobbleAmount = 40 + Math.random() * 80;
+      this.rotation = Math.random() * Math.PI * 2;
+      this.rotSpeed = (Math.random() - 0.5) * 0.15;
+      this.opacityMul = 0.35 + Math.random() * 0.5;
+    }
+    update(dt){
+      this.life += dt;
+      const lifeRatio = this.life / this.maxLife;
+      if(lifeRatio >= 1){ this.reset(false); return; }
+      this.y -= this.speed * dt;
+      const n = noise(this.wobbleSeed + this.life * this.wobbleSpeed);
+      this.x = this.baseX + n * this.wobbleAmount;
+      this.rotation += this.rotSpeed * dt;
+      this.currentSize = this.size + (this.maxSize - this.size) * lifeRatio;
+      // krzywa zanikania: wchodzi, trwa, zanika
+      let fade;
+      if(lifeRatio < 0.15) fade = lifeRatio / 0.15;
+      else if(lifeRatio > 0.7) fade = 1 - (lifeRatio - 0.7) / 0.3;
+      else fade = 1;
+      this.currentOpacity = fade * this.opacityMul;
+    }
+    draw(ctx){
+      if(this.currentOpacity <= 0.005) return;
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.rotation);
+      const r = this.currentSize;
+      const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, r);
+      grad.addColorStop(0, `rgba(255,40,60,${this.currentOpacity * 0.55})`);
+      grad.addColorStop(0.4, `rgba(160,10,30,${this.currentOpacity * 0.32})`);
+      grad.addColorStop(1, 'rgba(20,0,5,0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, r, r * 0.85, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  const particles = [];
+  const PARTICLE_COUNT = window.innerWidth < 700 ? 10 : 18;
+  for(let i = 0; i < PARTICLE_COUNT; i++){
+    const p = new SmokeParticle();
+    p.life = Math.random() * p.maxLife; // rozbicie w czasie startowym
+    particles.push(p);
+  }
+
+  let lastTime = performance.now();
+  function animateSmoke(now){
+    const dt = Math.min((now - lastTime) / 1000, 0.05);
+    lastTime = now;
+    ctx.clearRect(0, 0, W, H);
+    for(const p of particles){
+      p.update(dt);
+      p.draw(ctx);
+    }
+    requestAnimationFrame(animateSmoke);
+  }
+  requestAnimationFrame(animateSmoke);
 </script>
 
 </body>
 </html>
-
